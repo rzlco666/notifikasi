@@ -251,289 +251,252 @@ class Notifikasi implements NotifikasiInterface
         return sprintf(
             '<style id="%s-styles">%s</style>',
             $prefix,
-            $this->getCssStyles($prefix, $theme, $animationDuration, $blurEffect)
+            $this->generateStyles()
         );
     }
 
-    private function getCssStyles(string $prefix, string $theme, int $animationDuration, string $blurEffect): string
+    private function generateStyles(): string
     {
-        $colors = $this->getThemeColors($theme);
-        $backgroundOpacity = $this->config['background_opacity'];
-        $backgroundBlur = $this->config['background_blur'];
-
         return "
-            .{$prefix}-container {
-                position: fixed;
+        <style id=\"rzlco-notifikasi-styles\">
+            .rzlco-notifikasi-container {
+                position: fixed !important;
                 pointer-events: none;
-                z-index: {$this->config['z_index']};
+                z-index: 99999999 !important;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 font-size: 14px;
                 line-height: 1.4;
             }
             
-            .{$prefix}-position-top-right {
-                top: 20px;
-                right: 20px;
+            .rzlco-notifikasi-position-top-right {
+                top: 20px !important;
+                right: 20px !important;
             }
             
-            .{$prefix}-position-top-left {
-                top: 20px;
-                left: 20px;
+            .rzlco-notifikasi-position-top-left {
+                top: 20px !important;
+                left: 20px !important;
             }
             
-            .{$prefix}-position-bottom-right {
-                bottom: 20px;
-                right: 20px;
+            .rzlco-notifikasi-position-bottom-right {
+                bottom: 20px !important;
+                right: 20px !important;
             }
             
-            .{$prefix}-position-bottom-left {
-                bottom: 20px;
-                left: 20px;
+            .rzlco-notifikasi-position-bottom-left {
+                bottom: 20px !important;
+                left: 20px !important;
             }
             
-            .{$prefix}-position-top-center {
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
+            .rzlco-notifikasi-position-top-center {
+                top: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
             }
             
-            .{$prefix}-position-bottom-center {
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
+            .rzlco-notifikasi-position-bottom-center {
+                bottom: 20px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
             }
             
-            .{$prefix}-notification {
-                pointer-events: auto;
-                margin-bottom: 12px;
-                min-width: 300px;
-                max-width: 500px;
-                border-radius: 16px;
-                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                background: {$colors['background']};
-                border: 1px solid {$colors['border']};
-                backdrop-filter: blur({$backgroundBlur}px);
-                -webkit-backdrop-filter: blur({$backgroundBlur}px);
-                opacity: 0;
-                transform: translateX(100%) scale(0.95);
-                transition: all {$animationDuration}ms cubic-bezier(0.4, 0, 0.2, 1);
-                overflow: hidden;
-                position: relative;
-                display: flex;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 16px 20px;
+            .rzlco-notifikasi-notification {
+                pointer-events: auto !important;
+                margin-bottom: 12px !important;
+                min-width: 300px !important;
+                max-width: 500px !important;
+                border-radius: 16px !important;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+                backdrop-filter: blur(25px) !important;
+                -webkit-backdrop-filter: blur(25px) !important;
+                opacity: 0 !important;
+                transform: translateX(100%) scale(0.95) !important;
+                transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+                overflow: hidden !important;
+                position: relative !important;
+                display: flex !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+                padding: 16px 20px !important;
             }
             
-            .{$prefix}-notification.{$prefix}-show {
-                opacity: 1;
-                transform: translateX(0) scale(1);
+            .rzlco-notifikasi-notification.rzlco-notifikasi-show {
+                opacity: 1 !important;
+                transform: translateX(0) scale(1) !important;
             }
             
-            .{$prefix}-notification.{$prefix}-hide {
-                opacity: 0;
-                transform: translateX(100%) scale(0.95);
-                margin-bottom: 0;
-                max-height: 0;
-                padding: 0;
+            .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
+                opacity: 0 !important;
+                transform: translateX(100%) scale(0.95) !important;
+                margin-bottom: 0 !important;
+                max-height: 0 !important;
+                padding: 0 !important;
             }
             
-            .{$prefix}-notification:hover {
-                transform: translateY(-2px) scale(1.02);
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+            .rzlco-notifikasi-notification:hover {
+                transform: translateY(-2px) scale(1.02) !important;
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
             }
             
-            .{$prefix}-content {
-                flex: 1;
-                min-width: 0;
+            .rzlco-notifikasi-content {
+                flex: 1 !important;
+                min-width: 0 !important;
             }
             
-            .{$prefix}-icon {
-                flex-shrink: 0;
-                width: 20px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-top: 1px;
+            .rzlco-notifikasi-icon {
+                flex-shrink: 0 !important;
+                width: 20px !important;
+                height: 20px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin-top: 1px !important;
             }
             
-            .{$prefix}-message {
-                color: {$colors['text']};
-                font-weight: 500;
-                word-break: break-word;
-                margin: 0;
+            .rzlco-notifikasi-message {
+                color: rgba(0, 0, 0, 0.9) !important;
+                font-weight: 500 !important;
+                word-break: break-word !important;
+                margin: 0 !important;
             }
             
-            .{$prefix}-time {
-                font-size: 11px;
-                opacity: 0.6;
-                margin-right: 24px;
-                font-weight: 500;
-                font-variant-numeric: tabular-nums;
-                color: {$colors['text']};
-                position: absolute;
-                top: 12px;
-                right: 24px;
+            .rzlco-notifikasi-time {
+                font-size: 11px !important;
+                opacity: 0.6 !important;
+                margin-right: 24px !important;
+                font-weight: 500 !important;
+                font-variant-numeric: tabular-nums !important;
+                color: rgba(0, 0, 0, 0.9) !important;
+                position: absolute !important;
+                top: 12px !important;
+                right: 24px !important;
             }
             
-            .{$prefix}-close {
-                position: absolute;
-                top: 12px;
-                right: 12px;
-                background: rgba(128, 128, 128, 0.2);
-                border: none;
-                cursor: pointer;
-                padding: 4px;
-                border-radius: 50%;
-                color: {$colors['text']};
-                opacity: 0.7;
-                transition: all 0.2s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 20px;
-                height: 20px;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                font-size: 12px;
+            .rzlco-notifikasi-close {
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                background: rgba(128, 128, 128, 0.2) !important;
+                border: none !important;
+                cursor: pointer !important;
+                padding: 4px !important;
+                border-radius: 50% !important;
+                color: rgba(0, 0, 0, 0.9) !important;
+                opacity: 0.7 !important;
+                transition: all 0.2s ease !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 20px !important;
+                height: 20px !important;
+                backdrop-filter: blur(10px) !important;
+                -webkit-backdrop-filter: blur(10px) !important;
+                font-size: 12px !important;
             }
             
-            .{$prefix}-close:hover {
-                opacity: 1;
-                background: rgba(128, 128, 128, 0.3);
-                transform: scale(1.1);
+            .rzlco-notifikasi-close:hover {
+                opacity: 1 !important;
+                background: rgba(128, 128, 128, 0.3) !important;
+                transform: scale(1.1) !important;
             }
             
-            .{$prefix}-close:active {
-                transform: scale(0.95);
+            .rzlco-notifikasi-close:active {
+                transform: scale(0.95) !important;
             }
             
-            .{$prefix}-level-success {
-                background: {$colors['success_bg']};
-                border-color: {$colors['success_border']};
+            .rzlco-notifikasi-level-success {
+                background: rgba(34, 197, 94, 0.05) !important;
+                border-color: rgba(34, 197, 94, 0.2) !important;
             }
             
-            .{$prefix}-level-success .{$prefix}-icon {
-                color: {$colors['success_icon']};
+            .rzlco-notifikasi-level-success .rzlco-notifikasi-icon {
+                color: #16a34a !important;
             }
             
-            .{$prefix}-level-error {
-                background: {$colors['error_bg']};
-                border-color: {$colors['error_border']};
+            .rzlco-notifikasi-level-error {
+                background: rgba(239, 68, 68, 0.05) !important;
+                border-color: rgba(239, 68, 68, 0.2) !important;
             }
             
-            .{$prefix}-level-error .{$prefix}-icon {
-                color: {$colors['error_icon']};
+            .rzlco-notifikasi-level-error .rzlco-notifikasi-icon {
+                color: #dc2626 !important;
             }
             
-            .{$prefix}-level-warning {
-                background: {$colors['warning_bg']};
-                border-color: {$colors['warning_border']};
+            .rzlco-notifikasi-level-warning {
+                background: rgba(245, 158, 11, 0.05) !important;
+                border-color: rgba(245, 158, 11, 0.2) !important;
             }
             
-            .{$prefix}-level-warning .{$prefix}-icon {
-                color: {$colors['warning_icon']};
+            .rzlco-notifikasi-level-warning .rzlco-notifikasi-icon {
+                color: #d97706 !important;
             }
             
-            .{$prefix}-level-info {
-                background: {$colors['info_bg']};
-                border-color: {$colors['info_border']};
+            .rzlco-notifikasi-level-info {
+                background: rgba(59, 130, 246, 0.05) !important;
+                border-color: rgba(59, 130, 246, 0.2) !important;
             }
             
-            .{$prefix}-level-info .{$prefix}-icon {
-                color: {$colors['info_icon']};
+            .rzlco-notifikasi-level-info .rzlco-notifikasi-icon {
+                color: #2563eb !important;
             }
             
-            .{$prefix}-container-left .{$prefix}-notification {
-                transform: translateX(-100%) scale(0.95);
+            .rzlco-notifikasi-container-left .rzlco-notifikasi-notification {
+                transform: translateX(-100%) scale(0.95) !important;
             }
             
-            .{$prefix}-container-left .{$prefix}-notification.{$prefix}-show {
-                transform: translateX(0) scale(1);
+            .rzlco-notifikasi-container-left .rzlco-notifikasi-notification.rzlco-notifikasi-show {
+                transform: translateX(0) scale(1) !important;
             }
             
-            .{$prefix}-container-left .{$prefix}-notification.{$prefix}-hide {
-                transform: translateX(-100%) scale(0.95);
+            .rzlco-notifikasi-container-left .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
+                transform: translateX(-100%) scale(0.95) !important;
             }
             
-            .{$prefix}-container-center .{$prefix}-notification {
-                transform: translateY(-100%) scale(0.95);
+            .rzlco-notifikasi-container-center .rzlco-notifikasi-notification {
+                transform: translateY(-100%) scale(0.95) !important;
             }
             
-            .{$prefix}-container-center .{$prefix}-notification.{$prefix}-show {
-                transform: translateY(0) scale(1);
+            .rzlco-notifikasi-container-center .rzlco-notifikasi-notification.rzlco-notifikasi-show {
+                transform: translateY(0) scale(1) !important;
             }
             
-            .{$prefix}-container-center .{$prefix}-notification.{$prefix}-hide {
-                transform: translateY(-100%) scale(0.95);
+            .rzlco-notifikasi-container-center .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
+                transform: translateY(-100%) scale(0.95) !important;
             }
             
-            @media (max-width: 640px) {
-                .{$prefix}-container {
-                    left: 10px !important;
-                    right: 10px !important;
-                    transform: none !important;
+            /* Dark mode support */
+            @media (prefers-color-scheme: dark) {
+                .rzlco-notifikasi-notification {
+                    background: rgba(30, 30, 30, 0.95) !important;
+                    border-color: rgba(255, 255, 255, 0.1) !important;
                 }
                 
-                .{$prefix}-notification {
-                    min-width: auto;
-                    max-width: none;
-                    margin-left: 0;
-                    margin-right: 0;
+                .rzlco-notifikasi-message {
+                    color: rgba(255, 255, 255, 0.9) !important;
+                }
+                
+                .rzlco-notifikasi-time {
+                    color: rgba(255, 255, 255, 0.9) !important;
+                }
+                
+                .rzlco-notifikasi-close {
+                    color: rgba(255, 255, 255, 0.9) !important;
                 }
             }
             
-            @media (prefers-reduced-motion: reduce) {
-                .{$prefix}-notification {
-                    transition: none;
-                }
+            /* Force visibility for debugging */
+            .rzlco-notifikasi-container {
+                display: block !important;
+                visibility: visible !important;
             }
-        ";
-    }
-
-    private function getThemeColors(string $theme): array
-    {
-        $backgroundOpacity = $this->config['background_opacity'];
-
-        return match ($theme) {
-            'dark' => [
-                'background' => "rgba(30, 30, 30, {$backgroundOpacity})",
-                'border' => 'rgba(255, 255, 255, 0.1)',
-                'text' => 'rgba(255, 255, 255, 0.9)',
-                'close_hover' => 'rgba(255, 255, 255, 0.1)',
-                'success_bg' => 'rgba(34, 197, 94, 0.1)',
-                'success_border' => 'rgba(34, 197, 94, 0.2)',
-                'success_icon' => '#22c55e',
-                'error_bg' => 'rgba(239, 68, 68, 0.1)',
-                'error_border' => 'rgba(239, 68, 68, 0.2)',
-                'error_icon' => '#ef4444',
-                'warning_bg' => 'rgba(245, 158, 11, 0.1)',
-                'warning_border' => 'rgba(245, 158, 11, 0.2)',
-                'warning_icon' => '#f59e0b',
-                'info_bg' => 'rgba(59, 130, 246, 0.1)',
-                'info_border' => 'rgba(59, 130, 246, 0.2)',
-                'info_icon' => '#3b82f6',
-            ],
-            default => [
-                'background' => "rgba(255, 255, 255, {$backgroundOpacity})",
-                'border' => 'rgba(0, 0, 0, 0.1)',
-                'text' => 'rgba(0, 0, 0, 0.9)',
-                'close_hover' => 'rgba(0, 0, 0, 0.05)',
-                'success_bg' => 'rgba(34, 197, 94, 0.05)',
-                'success_border' => 'rgba(34, 197, 94, 0.2)',
-                'success_icon' => '#16a34a',
-                'error_bg' => 'rgba(239, 68, 68, 0.05)',
-                'error_border' => 'rgba(239, 68, 68, 0.2)',
-                'error_icon' => '#dc2626',
-                'warning_bg' => 'rgba(245, 158, 11, 0.05)',
-                'warning_border' => 'rgba(245, 158, 11, 0.2)',
-                'warning_icon' => '#d97706',
-                'info_bg' => 'rgba(59, 130, 246, 0.05)',
-                'info_border' => 'rgba(59, 130, 246, 0.2)',
-                'info_icon' => '#2563eb',
-            ],
-        };
+            
+            .rzlco-notifikasi-notification {
+                display: flex !important;
+                visibility: visible !important;
+            }
+        </style>";
     }
 
     private function renderScript(): string
@@ -549,24 +512,25 @@ class Notifikasi implements NotifikasiInterface
         return sprintf(
             '<script id="%s-script">%s</script>',
             $prefix,
-            $this->getJavaScript($prefix, $containerId, $duration, $animationDuration, $autoDismiss, $sound, $maxNotifications)
+            $this->generateScript()
         );
     }
 
-    private function getJavaScript(string $prefix, string $containerId, int $duration, int $animationDuration, string $autoDismiss, string $sound, int $maxNotifications): string
+    private function generateScript(): string
     {
         return "
+        <script id=\"rzlco-notifikasi-script\">
             (function() {
                 'use strict';
                 
                 const config = {
-                    prefix: '{$prefix}',
-                    containerId: '{$containerId}',
-                    duration: {$duration},
-                    animationDuration: {$animationDuration},
-                    autoDismiss: {$autoDismiss},
-                    sound: {$sound},
-                    maxNotifications: {$maxNotifications}
+                    prefix: 'rzlco-notifikasi',
+                    containerId: 'rzlco-notifikasi-container',
+                    duration: 5000,
+                    animationDuration: 300,
+                    autoDismiss: true,
+                    sound: true,
+                    maxNotifications: 5
                 };
                 
                 class NotifikasiManager {
@@ -578,8 +542,12 @@ class Notifikasi implements NotifikasiInterface
                     
                     init() {
                         this.container = document.getElementById(config.containerId);
-                        if (!this.container) return;
+                        if (!this.container) {
+                            console.warn('Notifikasi container not found');
+                            return;
+                        }
                         
+                        console.log('NotifikasiManager initialized');
                         this.setupEventListeners();
                         this.showNotifications();
                         this.limitNotifications();
@@ -613,6 +581,8 @@ class Notifikasi implements NotifikasiInterface
                     
                     showNotifications() {
                         const notifications = this.container.querySelectorAll('.' + config.prefix + '-notification');
+                        console.log('Found ' + notifications.length + ' notifications to show');
+                        
                         notifications.forEach((notification, index) => {
                             setTimeout(() => {
                                 this.showNotification(notification);
@@ -621,6 +591,8 @@ class Notifikasi implements NotifikasiInterface
                     }
                     
                     showNotification(notification) {
+                        console.log('Showing notification:', notification.id);
+                        
                         requestAnimationFrame(() => {
                             notification.classList.add(config.prefix + '-show');
                             
@@ -700,12 +672,22 @@ class Notifikasi implements NotifikasiInterface
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', () => {
+                        console.log('DOM loaded, initializing NotifikasiManager');
                         new NotifikasiManager();
                     });
                 } else {
+                    console.log('DOM already loaded, initializing NotifikasiManager');
                     new NotifikasiManager();
                 }
+                
+                // Fallback initialization
+                setTimeout(() => {
+                    if (!window.notifikasiManager) {
+                        console.log('Fallback initialization of NotifikasiManager');
+                        window.notifikasiManager = new NotifikasiManager();
+                    }
+                }, 1000);
             })();
-        ";
+        </script>";
     }
 }
