@@ -1,8 +1,8 @@
 {
-    "name": "rzlco666/notifikasi",
-    "description": "Apple-inspired liquid glass notification library for PHP and Laravel",
+    "name": "rzlco/notifikasi",
+    "description": "Apple-inspired liquid glass notifications for PHP and Laravel",
     "type": "library",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "keywords": ["notification", "apple", "liquid-glass", "php", "laravel"],
     "homepage": "https://github.com/rzlco666/notifikasi",
     "license": "MIT",

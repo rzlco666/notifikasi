@@ -243,26 +243,12 @@ class Notifikasi implements NotifikasiInterface
 
     private function renderStyles(): string
     {
-        $prefix = $this->config['css_prefix'];
-        $theme = $this->config['theme'];
-        $animationDuration = $this->config['animation_duration'];
-        $blurEffect = $this->config['blur_effect'] ? 'backdrop-filter: blur(20px);' : '';
-
-        return sprintf(
-            '<style id="%s-styles">%s</style>',
-            $prefix,
-            $this->generateStyles()
-        );
-    }
-
-    private function generateStyles(): string
-    {
         return "
         <style id=\"rzlco-notifikasi-styles\">
             .rzlco-notifikasi-container {
                 position: fixed !important;
                 pointer-events: none;
-                z-index: 99999999 !important;
+                z-index: 999999999 !important;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
                 font-size: 14px;
                 line-height: 1.4;
@@ -496,13 +482,29 @@ class Notifikasi implements NotifikasiInterface
                 display: flex !important;
                 visibility: visible !important;
             }
+            
+            /* Override any template CSS that might hide notifications */
+            .rzlco-notifikasi-container * {
+                box-sizing: border-box !important;
+            }
+            
+            /* Ensure notifications are always on top */
+            .rzlco-notifikasi-container {
+                position: fixed !important;
+                z-index: 999999999 !important;
+                pointer-events: none !important;
+            }
+            
+            .rzlco-notifikasi-notification {
+                pointer-events: auto !important;
+                z-index: 999999999 !important;
+            }
         </style>";
     }
 
     private function renderScript(): string
     {
         $prefix = $this->config['css_prefix'];
-        $containerId = $this->config['container_id'];
         $duration = $this->config['duration'];
         $animationDuration = $this->config['animation_duration'];
         $autoDismiss = $this->config['auto_dismiss'] ? 'true' : 'false';
@@ -519,18 +521,17 @@ class Notifikasi implements NotifikasiInterface
     private function generateScript(): string
     {
         return "
-        <script id=\"rzlco-notifikasi-script\">
             (function() {
                 'use strict';
                 
                 const config = {
                     prefix: 'rzlco-notifikasi',
                     containerId: 'rzlco-notifikasi-container',
-                    duration: 5000,
-                    animationDuration: 300,
-                    autoDismiss: true,
-                    sound: true,
-                    maxNotifications: 5
+                    duration: {$this->config['duration']},
+                    animationDuration: {$this->config['animation_duration']},
+                    autoDismiss: " . ($this->config['auto_dismiss'] ? 'true' : 'false') . ",
+                    sound: " . ($this->config['sound'] ? 'true' : 'false') . ",
+                    maxNotifications: {$this->config['max_notifications']}
                 };
                 
                 class NotifikasiManager {
@@ -543,11 +544,11 @@ class Notifikasi implements NotifikasiInterface
                     init() {
                         this.container = document.getElementById(config.containerId);
                         if (!this.container) {
-                            console.warn('Notifikasi container not found');
+                            console.warn('Notifikasi container not found: ' + config.containerId);
                             return;
                         }
                         
-                        console.log('NotifikasiManager initialized');
+                        console.log('NotifikasiManager initialized successfully');
                         this.setupEventListeners();
                         this.showNotifications();
                         this.limitNotifications();
@@ -592,7 +593,6 @@ class Notifikasi implements NotifikasiInterface
                     
                     showNotification(notification) {
                         console.log('Showing notification:', notification.id);
-                        
                         requestAnimationFrame(() => {
                             notification.classList.add(config.prefix + '-show');
                             
@@ -687,7 +687,23 @@ class Notifikasi implements NotifikasiInterface
                         window.notifikasiManager = new NotifikasiManager();
                     }
                 }, 1000);
+                
+                // Global fallback for debugging
+                window.debugNotifikasi = function() {
+                    const container = document.getElementById(config.containerId);
+                    if (container) {
+                        console.log('Container found:', container);
+                        const notifications = container.querySelectorAll('.' + config.prefix + '-notification');
+                        console.log('Notifications found:', notifications.length);
+                        notifications.forEach((n, i) => {
+                            console.log('Notification ' + i + ':', n.id, n.className);
+                        });
+                    } else {
+                        console.log('Container not found');
+                    }
+                };
             })();
-        </script>";
+        ";
     }
 }
+ 
