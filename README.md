@@ -27,7 +27,7 @@ A beautiful, Apple-inspired liquid glass notification system for PHP and Laravel
 ## Requirements
 
 - PHP 8.2 or higher
-- Laravel 11.0 or higher (for Laravel integration)
+- Laravel 12.0 or higher (for Laravel integration)
 
 ## Installation
 
