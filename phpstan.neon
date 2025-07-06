@@ -1,0 +1,41 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - tests/bootstrap.php
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::expects\(\)#'
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::method\(\)#'
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::with\(\)#'
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::willReturn\(\)#'
+        - '#Call to an undefined method PHPUnit\\Framework\\MockObject\\MockObject::#'
+    bootstrapFiles:
+        - vendor/autoload.php
+    scanDirectories:
+        - vendor
+    scanFiles: []
+    stubFiles: []
+    universalObjectCratesClasses:
+        - stdClass
+    earlyTerminatingMethodCalls: []
+    memoryLimitFile: .phpstan-memory-limit
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32
+        minimumNumberOfJobsPerProcess: 2
+    tmpDir: .phpstan-cache
+    checkAlwaysTrueCheckTypeFunctionCall: true
+    checkAlwaysTrueInstanceof: true
+    checkAlwaysTrueStrictComparison: true
+    checkExplicitMixedMissingReturn: true
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
+    checkUninitializedProperties: true
+    checkDynamicProperties: true
+    treatPhpDocTypesAsCertain: false 
