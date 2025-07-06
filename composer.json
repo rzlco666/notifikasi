@@ -1,22 +1,28 @@
 {
-    "name": "rzlco/notifikasi",
-    "description": "A beautiful Apple-style liquid glass notification system for Laravel with real-time updates and modern UI",
+    "name": "rzlco666/notifikasi",
+    "description": "Apple-inspired liquid glass notification library for PHP and Laravel",
     "type": "library",
+    "version": "0.1.4",
+    "keywords": ["notification", "apple", "liquid-glass", "php", "laravel"],
+    "homepage": "https://github.com/rzlco666/notifikasi",
     "license": "MIT",
-    "keywords": ["laravel", "notification", "toast", "ui", "glass", "apple", "liquid"],
     "authors": [
         {
-            "name": "Rizki",
-            "email": "rizki@example.com"
+            "name": "Syahrizal hanif",
+            "email": "syahrizalhanif@gmail.com"
         }
     ],
     "require": {
-        "php": "^8.1",
-        "illuminate/support": "^12.0"
+        "php": ">=8.2",
+        "illuminate/support": "^12.0",
+        "illuminate/session": "^12.0",
+        "illuminate/view": "^12.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^9.0",
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7",
+        "orchestra/testbench": "^10.0"
     },
     "autoload": {
         "psr-4": {
@@ -38,10 +44,19 @@
             }
         }
     },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "phpstan": "vendor/bin/phpstan analyse src --level=8",
+        "phpcs": "vendor/bin/phpcs src --standard=PSR12",
+        "phpcbf": "vendor/bin/phpcbf src --standard=PSR12"
+    },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true,
-    "version": "0.1.2"
+    "prefer-stable": true
 } 
