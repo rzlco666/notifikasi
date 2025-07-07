@@ -20,7 +20,40 @@ class Notifikasi implements NotifikasiInterface
     public function __construct(?StorageInterface $storage = null, array $config = [])
     {
         $this->storage = $storage ?? new ArrayStorage();
-        $this->config = array_merge($this->getDefaultConfig(), $config);
+        
+        // Handle Laravel config structure
+        $resolvedConfig = $this->resolveConfig($config);
+        $this->config = array_merge($this->getDefaultConfig(), $resolvedConfig);
+    }
+
+    /**
+     * Resolve Laravel config structure to flat config array
+     */
+    private function resolveConfig(array $config): array
+    {
+        // If config has 'defaults' key (Laravel config structure), use it
+        if (isset($config['defaults']) && is_array($config['defaults'])) {
+            $resolved = $config['defaults'];
+            
+            // Map Laravel config keys to internal keys
+            if (isset($resolved['max_notifications'])) {
+                $resolved['max_notifications'] = $resolved['max_notifications'];
+            }
+            if (isset($resolved['animation_duration'])) {
+                $resolved['animation_duration'] = $resolved['animation_duration'];
+            }
+            if (isset($resolved['closable'])) {
+                $resolved['show_close_button'] = $resolved['closable'];
+            }
+            if (isset($resolved['pause_on_hover'])) {
+                $resolved['pause_on_hover'] = $resolved['pause_on_hover'];
+            }
+            
+            return $resolved;
+        }
+        
+        // Otherwise return config as-is (direct usage)
+        return $config;
     }
 
     private function getDefaultConfig(): array
@@ -263,6 +296,13 @@ class Notifikasi implements NotifikasiInterface
 
     private function renderStyles(): string
     {
+        $theme = $this->config['theme'] ?? 'auto';
+        $backgroundOpacity = $this->config['background_opacity'] ?? 0.85;
+        $backgroundBlur = $this->config['background_blur'] ?? 25;
+        
+        // Generate theme-specific colors
+        $themeStyles = $this->generateThemeStyles($theme, $backgroundOpacity);
+        
         return "
         <style id=\"rzlco-notifikasi-styles\">
             .rzlco-notifikasi-container {
@@ -313,10 +353,8 @@ class Notifikasi implements NotifikasiInterface
                 max-width: 500px !important;
                 border-radius: 16px !important;
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-                background: rgba(255, 255, 255, 0.95) !important;
-                border: 1px solid rgba(0, 0, 0, 0.1) !important;
-                backdrop-filter: blur(25px) !important;
-                -webkit-backdrop-filter: blur(25px) !important;
+                backdrop-filter: blur({$backgroundBlur}px) !important;
+                -webkit-backdrop-filter: blur({$backgroundBlur}px) !important;
                 opacity: 0 !important;
                 transform: translateX(100%) scale(0.95) !important;
                 transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -326,6 +364,7 @@ class Notifikasi implements NotifikasiInterface
                 align-items: flex-start !important;
                 gap: 12px !important;
                 padding: 16px 20px !important;
+                {$themeStyles['notification']}
             }
             
             .rzlco-notifikasi-notification.rzlco-notifikasi-show {
@@ -362,10 +401,10 @@ class Notifikasi implements NotifikasiInterface
             }
             
             .rzlco-notifikasi-message {
-                color: rgba(0, 0, 0, 0.9) !important;
                 font-weight: 500 !important;
                 word-break: break-word !important;
                 margin: 0 !important;
+                {$themeStyles['text']}
             }
             
             .rzlco-notifikasi-time {
@@ -374,10 +413,10 @@ class Notifikasi implements NotifikasiInterface
                 margin-right: 24px !important;
                 font-weight: 500 !important;
                 font-variant-numeric: tabular-nums !important;
-                color: rgba(0, 0, 0, 0.9) !important;
                 position: absolute !important;
                 top: 12px !important;
                 right: 24px !important;
+                {$themeStyles['text']}
             }
             
             .rzlco-notifikasi-close {
@@ -389,7 +428,6 @@ class Notifikasi implements NotifikasiInterface
                 cursor: pointer !important;
                 padding: 4px !important;
                 border-radius: 50% !important;
-                color: rgba(0, 0, 0, 0.9) !important;
                 opacity: 0.7 !important;
                 transition: all 0.2s ease !important;
                 display: flex !important;
@@ -400,6 +438,7 @@ class Notifikasi implements NotifikasiInterface
                 backdrop-filter: blur(10px) !important;
                 -webkit-backdrop-filter: blur(10px) !important;
                 font-size: 12px !important;
+                {$themeStyles['close']}
             }
             
             .rzlco-notifikasi-close:hover {
@@ -472,25 +511,7 @@ class Notifikasi implements NotifikasiInterface
                 transform: translateY(-100%) scale(0.95) !important;
             }
             
-            /* Dark mode support */
-            @media (prefers-color-scheme: dark) {
-                .rzlco-notifikasi-notification {
-                    background: rgba(30, 30, 30, 0.95) !important;
-                    border-color: rgba(255, 255, 255, 0.1) !important;
-                }
-                
-                .rzlco-notifikasi-message {
-                    color: rgba(255, 255, 255, 0.9) !important;
-                }
-                
-                .rzlco-notifikasi-time {
-                    color: rgba(255, 255, 255, 0.9) !important;
-                }
-                
-                .rzlco-notifikasi-close {
-                    color: rgba(255, 255, 255, 0.9) !important;
-                }
-            }
+            {$themeStyles['media_query']}
             
             /* Force visibility for debugging */
             .rzlco-notifikasi-container {
@@ -520,6 +541,72 @@ class Notifikasi implements NotifikasiInterface
                 z-index: 999999999 !important;
             }
         </style>";
+    }
+
+    /**
+     * Generate theme-specific CSS styles
+     */
+    private function generateThemeStyles(string $theme, float $backgroundOpacity): array
+    {
+        $lightTheme = [
+            'notification' => "
+                background: rgba(255, 255, 255, {$backgroundOpacity}) !important;
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            ",
+            'text' => "color: rgba(0, 0, 0, 0.9) !important;",
+            'close' => "color: rgba(0, 0, 0, 0.9) !important;",
+            'media_query' => ''
+        ];
+        
+        $darkTheme = [
+            'notification' => "
+                background: rgba(30, 30, 30, {$backgroundOpacity}) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            ",
+            'text' => "color: rgba(255, 255, 255, 0.9) !important;",
+            'close' => "color: rgba(255, 255, 255, 0.9) !important;",
+            'media_query' => ''
+        ];
+        
+        switch ($theme) {
+            case 'light':
+                return $lightTheme;
+                
+            case 'dark':
+                return $darkTheme;
+                
+            case 'auto':
+            default:
+                // For auto theme, use CSS media query
+                return [
+                    'notification' => "
+                        background: rgba(255, 255, 255, {$backgroundOpacity}) !important;
+                        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+                    ",
+                    'text' => "color: rgba(0, 0, 0, 0.9) !important;",
+                    'close' => "color: rgba(0, 0, 0, 0.9) !important;",
+                    'media_query' => "
+                        @media (prefers-color-scheme: dark) {
+                            .rzlco-notifikasi-notification {
+                                background: rgba(30, 30, 30, {$backgroundOpacity}) !important;
+                                border-color: rgba(255, 255, 255, 0.1) !important;
+                            }
+                            
+                            .rzlco-notifikasi-message {
+                                color: rgba(255, 255, 255, 0.9) !important;
+                            }
+                            
+                            .rzlco-notifikasi-time {
+                                color: rgba(255, 255, 255, 0.9) !important;
+                            }
+                            
+                            .rzlco-notifikasi-close {
+                                color: rgba(255, 255, 255, 0.9) !important;
+                            }
+                        }
+                    "
+                ];
+        }
     }
 
     private function renderScript(): string
