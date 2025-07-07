@@ -35,24 +35,40 @@ class Notifikasi implements NotifikasiInterface
         if (isset($config['defaults']) && is_array($config['defaults'])) {
             $resolved = $config['defaults'];
             
+            // Convert position string to enum if needed
+            if (isset($resolved['position']) && is_string($resolved['position'])) {
+                $resolved['position'] = NotificationPosition::tryFrom($resolved['position']) 
+                    ?? NotificationPosition::TOP_RIGHT;
+            }
+            
             // Map Laravel config keys to internal keys
-            if (isset($resolved['max_notifications'])) {
-                $resolved['max_notifications'] = $resolved['max_notifications'];
-            }
-            if (isset($resolved['animation_duration'])) {
-                $resolved['animation_duration'] = $resolved['animation_duration'];
-            }
-            if (isset($resolved['closable'])) {
-                $resolved['show_close_button'] = $resolved['closable'];
-            }
-            if (isset($resolved['pause_on_hover'])) {
-                $resolved['pause_on_hover'] = $resolved['pause_on_hover'];
+            $keyMapping = [
+                'max_notifications' => 'max_notifications',
+                'animation_duration' => 'animation_duration',
+                'closable' => 'show_close_button',
+                'pause_on_hover' => 'pause_on_hover',
+                'blur_strength' => 'background_blur',
+                'border_radius' => 'border_radius',
+                'backdrop_opacity' => 'background_opacity',
+            ];
+            
+            foreach ($keyMapping as $laravelKey => $internalKey) {
+                if (isset($resolved[$laravelKey])) {
+                    $resolved[$internalKey] = $resolved[$laravelKey];
+                    // Keep original key too for backward compatibility
+                }
             }
             
             return $resolved;
         }
         
         // Otherwise return config as-is (direct usage)
+        // But still handle position conversion if it's a string
+        if (isset($config['position']) && is_string($config['position'])) {
+            $config['position'] = NotificationPosition::tryFrom($config['position']) 
+                ?? NotificationPosition::TOP_RIGHT;
+        }
+        
         return $config;
     }
 
@@ -68,7 +84,7 @@ class Notifikasi implements NotifikasiInterface
             'show_close_button' => true,
             'auto_dismiss' => true,
             'rtl' => false,
-            'theme' => 'light',
+            'theme' => 'auto',
             'z_index' => 999999,
             'container_id' => 'rzlco-notifikasi-container',
             'css_prefix' => 'rzlco-notifikasi',
@@ -77,6 +93,12 @@ class Notifikasi implements NotifikasiInterface
             'background_opacity' => 0.85,
             'background_blur' => 25,
             'close_button_style' => 'circle',
+            // Laravel config keys support
+            'closable' => true,
+            'pause_on_hover' => true,
+            'blur_strength' => 25,
+            'border_radius' => 16,
+            'backdrop_opacity' => 0.8,
         ];
     }
 
@@ -155,7 +177,15 @@ class Notifikasi implements NotifikasiInterface
     private function renderContainerWithNotifications(array $notifications): string
     {
         $containerId = $this->config['container_id'];
-        $position = $this->config['position']->value;
+        
+        // Handle position whether it's string or enum
+        $position = $this->config['position'];
+        if ($position instanceof NotificationPosition) {
+            $positionValue = $position->value;
+        } else {
+            $positionValue = (string) $position;
+        }
+        
         $zIndex = $this->config['z_index'];
         $rtl = $this->config['rtl'] ? 'rtl' : 'ltr';
         
@@ -166,7 +196,7 @@ class Notifikasi implements NotifikasiInterface
             $containerId,
             $this->config['css_prefix'],
             $this->config['css_prefix'],
-            $position,
+            $positionValue,
             $zIndex,
             $rtl,
             $notificationsHtml
@@ -176,7 +206,15 @@ class Notifikasi implements NotifikasiInterface
     private function renderContainer(): string
     {
         $containerId = $this->config['container_id'];
-        $position = $this->config['position']->value;
+        
+        // Handle position whether it's string or enum
+        $position = $this->config['position'];
+        if ($position instanceof NotificationPosition) {
+            $positionValue = $position->value;
+        } else {
+            $positionValue = (string) $position;
+        }
+        
         $zIndex = $this->config['z_index'];
         $rtl = $this->config['rtl'] ? 'rtl' : 'ltr';
 
@@ -185,7 +223,7 @@ class Notifikasi implements NotifikasiInterface
             $containerId,
             $this->config['css_prefix'],
             $this->config['css_prefix'],
-            $position,
+            $positionValue,
             $zIndex,
             $rtl
         );
