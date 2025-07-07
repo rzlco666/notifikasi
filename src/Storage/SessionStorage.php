@@ -37,7 +37,11 @@ class SessionStorage implements StorageInterface
 
     public function clear(): void
     {
-        unset($_SESSION[self::SESSION_KEY]);
+        if (function_exists('session')) {
+            session()->forget(self::SESSION_KEY);
+        } else {
+            unset($_SESSION[self::SESSION_KEY]);
+        }
     }
 
     public function has(string $id): bool
@@ -71,6 +75,12 @@ class SessionStorage implements StorageInterface
 
     private function ensureSessionStarted(): void
     {
+        // In Laravel context, session is managed by framework
+        if (function_exists('session') && session()->isStarted()) {
+            return;
+        }
+        
+        // Fallback for native PHP
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -78,11 +88,19 @@ class SessionStorage implements StorageInterface
 
     private function getStoredNotifications(): array
     {
+        if (function_exists('session')) {
+            return session(self::SESSION_KEY, []);
+        }
+        
         return $_SESSION[self::SESSION_KEY] ?? [];
     }
 
     private function storeNotifications(array $notifications): void
     {
-        $_SESSION[self::SESSION_KEY] = $notifications;
+        if (function_exists('session')) {
+            session([self::SESSION_KEY => $notifications]);
+        } else {
+            $_SESSION[self::SESSION_KEY] = $notifications;
+        }
     }
 }
