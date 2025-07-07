@@ -109,8 +109,7 @@ class Notifikasi implements NotifikasiInterface
             return '';
         }
 
-        $html = $this->renderContainer();
-        $html .= $this->renderNotifications($notifications);
+        $html = $this->renderContainerWithNotifications($notifications);
         $html .= $this->renderStyles();
         $html .= $this->renderScript();
 
@@ -118,6 +117,27 @@ class Notifikasi implements NotifikasiInterface
         $this->clear();
 
         return $html;
+    }
+
+    private function renderContainerWithNotifications(array $notifications): string
+    {
+        $containerId = $this->config['container_id'];
+        $position = $this->config['position']->value;
+        $zIndex = $this->config['z_index'];
+        $rtl = $this->config['rtl'] ? 'rtl' : 'ltr';
+        
+        $notificationsHtml = $this->renderNotifications($notifications);
+
+        return sprintf(
+            '<div id="%s" class="%s-container %s-position-%s" style="z-index: %d; direction: %s;">%s</div>',
+            $containerId,
+            $this->config['css_prefix'],
+            $this->config['css_prefix'],
+            $position,
+            $zIndex,
+            $rtl,
+            $notificationsHtml
+        );
     }
 
     private function renderContainer(): string
