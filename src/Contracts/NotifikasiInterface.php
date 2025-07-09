@@ -8,15 +8,15 @@ use Rzlco\Notifikasi\Enums\NotificationLevel;
 
 interface NotifikasiInterface
 {
-    public function success(string $message, array $options = []): self;
+    public function success(string $title, string $message = '', array $options = []): self;
 
-    public function error(string $message, array $options = []): self;
+    public function error(string $title, string $message = '', array $options = []): self;
 
-    public function warning(string $message, array $options = []): self;
+    public function warning(string $title, string $message = '', array $options = []): self;
 
-    public function info(string $message, array $options = []): self;
+    public function info(string $title, string $message = '', array $options = []): self;
 
-    public function add(NotificationLevel $level, string $message, array $options = []): self;
+    public function add(NotificationLevel $level, string $title, string $message = '', array $options = []): self;
 
     public function getNotifications(): array;
 

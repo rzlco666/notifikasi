@@ -10,17 +10,20 @@ class Notification
 {
     private string $id;
     private NotificationLevel $level;
+    private string $title;
     private string $message;
     private array $options;
     private int $timestamp;
 
     public function __construct(
         NotificationLevel $level,
-        string $message,
+        string $title,
+        string $message = '',
         array $options = []
     ) {
         $this->id = $this->generateId();
         $this->level = $level;
+        $this->title = $title;
         $this->message = $message;
         $this->options = $options;
         $this->timestamp = time();
@@ -34,6 +37,11 @@ class Notification
     public function getLevel(): NotificationLevel
     {
         return $this->level;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
     }
 
     public function getMessage(): string
@@ -67,11 +75,24 @@ class Notification
         return array_key_exists($key, $this->options);
     }
 
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    public function setMessage(string $message): self
+    {
+        $this->message = $message;
+        return $this;
+    }
+
     public function toArray(): array
     {
         return [
             'id' => $this->id,
             'level' => $this->level->value,
+            'title' => $this->title,
             'message' => $this->message,
             'options' => $this->options,
             'timestamp' => $this->timestamp,
@@ -82,7 +103,8 @@ class Notification
     {
         $notification = new self(
             NotificationLevel::from($data['level']),
-            $data['message'],
+            $data['title'],
+            $data['message'] ?? '',
             $data['options'] ?? []
         );
 

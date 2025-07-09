@@ -85,7 +85,7 @@ class Notifikasi implements NotifikasiInterface
             'auto_dismiss' => true,
             'rtl' => false,
             'theme' => 'auto',
-            'z_index' => 999999,
+            'z_index' => 999999999,
             'container_id' => 'rzlco-notifikasi-container',
             'css_prefix' => 'rzlco-notifikasi',
             'show_time' => true,
@@ -93,39 +93,42 @@ class Notifikasi implements NotifikasiInterface
             'background_opacity' => 0.85,
             'background_blur' => 25,
             'close_button_style' => 'circle',
+            'border_radius' => 16,
+            'min_width' => 320,
+            'max_width' => 480,
             // Laravel config keys support
             'closable' => true,
             'pause_on_hover' => true,
             'blur_strength' => 25,
-            'border_radius' => 16,
-            'backdrop_opacity' => 0.8,
+            'backdrop_opacity' => 0.85,
         ];
     }
 
-    public function success(string $message, array $options = []): self
+    public function success(string $title, string $message = '', array $options = []): self
     {
-        return $this->add(NotificationLevel::SUCCESS, $message, $options);
+        return $this->add(NotificationLevel::SUCCESS, $title, $message, $options);
     }
 
-    public function error(string $message, array $options = []): self
+    public function error(string $title, string $message = '', array $options = []): self
     {
-        return $this->add(NotificationLevel::ERROR, $message, $options);
+        return $this->add(NotificationLevel::ERROR, $title, $message, $options);
     }
 
-    public function warning(string $message, array $options = []): self
+    public function warning(string $title, string $message = '', array $options = []): self
     {
-        return $this->add(NotificationLevel::WARNING, $message, $options);
+        return $this->add(NotificationLevel::WARNING, $title, $message, $options);
     }
 
-    public function info(string $message, array $options = []): self
+    public function info(string $title, string $message = '', array $options = []): self
     {
-        return $this->add(NotificationLevel::INFO, $message, $options);
+        return $this->add(NotificationLevel::INFO, $title, $message, $options);
     }
 
-    public function add(NotificationLevel $level, string $message, array $options = []): self
+    public function add(NotificationLevel $level, string $title, string $message = '', array $options = []): self
     {
         $notification = new Notification(
             level: $level,
+            title: $title,
             message: $message,
             options: array_merge($this->config, $options)
         );
@@ -244,6 +247,7 @@ class Notifikasi implements NotifikasiInterface
     {
         $id = $notification->getId();
         $level = $notification->getLevel()->value;
+        $title = htmlspecialchars($notification->getTitle(), ENT_QUOTES, 'UTF-8');
         $message = htmlspecialchars($notification->getMessage(), ENT_QUOTES, 'UTF-8');
         $icon = $this->getIcon($notification->getLevel());
         $closeButton = $this->config['show_close_button'] ? $this->renderCloseButton() : '';
@@ -261,10 +265,11 @@ class Notifikasi implements NotifikasiInterface
         }
 
         return sprintf(
-            '<div id="%s" class="%s-notification %s-level-%s" data-level="%s" data-id="%s">
+            '<div id="%s" class="%s-notification %s-%s" data-level="%s" data-id="%s">
                 <div class="%s-icon">%s</div>
                 <div class="%s-content">
-                    <div class="%s-message">%s</div>
+                    <div class="%s-title">%s</div>
+                    %s
                 </div>
                 %s
                 %s
@@ -279,7 +284,8 @@ class Notifikasi implements NotifikasiInterface
             $icon,
             $prefix,
             $prefix,
-            $message,
+            $title,
+            !empty($message) ? sprintf('<div class="%s-message">%s</div>', $prefix, $message) : '',
             $timeDisplay,
             $closeButton
         );
@@ -298,22 +304,10 @@ class Notifikasi implements NotifikasiInterface
     private function getIcon(NotificationLevel $level): string
     {
         return match ($level) {
-            NotificationLevel::SUCCESS => '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.5 4.5L6 12L2.5 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>',
-            NotificationLevel::ERROR => '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>',
-            NotificationLevel::WARNING => '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 1L15 14H1L8 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 5V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 13H8.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>',
-            NotificationLevel::INFO => '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2"/>
-                <path d="M8 11V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 5H8.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>',
+            NotificationLevel::SUCCESS => '✓',
+            NotificationLevel::ERROR => '✕',
+            NotificationLevel::WARNING => '⚠',
+            NotificationLevel::INFO => 'ℹ',
         };
     }
 
@@ -337,6 +331,9 @@ class Notifikasi implements NotifikasiInterface
         $theme = $this->config['theme'] ?? 'auto';
         $backgroundOpacity = $this->config['background_opacity'] ?? 0.85;
         $backgroundBlur = $this->config['background_blur'] ?? 25;
+        $borderRadius = $this->config['border_radius'] ?? 16;
+        $minWidth = $this->config['min_width'] ?? 320;
+        $maxWidth = $this->config['max_width'] ?? 480;
         
         // Generate theme-specific colors
         $themeStyles = $this->generateThemeStyles($theme, $backgroundOpacity);
@@ -345,11 +342,11 @@ class Notifikasi implements NotifikasiInterface
         <style id=\"rzlco-notifikasi-styles\">
             .rzlco-notifikasi-container {
                 position: fixed !important;
-                pointer-events: none;
+                pointer-events: none !important;
                 z-index: 999999999 !important;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                font-size: 14px;
-                line-height: 1.4;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+                font-size: 14px !important;
+                line-height: 1.4 !important;
             }
             
             .rzlco-notifikasi-position-top-right {
@@ -385,34 +382,38 @@ class Notifikasi implements NotifikasiInterface
             }
             
             .rzlco-notifikasi-notification {
-                pointer-events: auto !important;
-                margin-bottom: 12px !important;
-                min-width: 300px !important;
-                max-width: 500px !important;
-                border-radius: 16px !important;
-                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-                backdrop-filter: blur({$backgroundBlur}px) !important;
-                -webkit-backdrop-filter: blur({$backgroundBlur}px) !important;
-                opacity: 0 !important;
-                transform: translateX(100%) scale(0.95) !important;
-                transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
-                overflow: hidden !important;
                 position: relative !important;
                 display: flex !important;
                 align-items: flex-start !important;
                 gap: 12px !important;
+                min-width: {$minWidth}px !important;
+                max-width: {$maxWidth}px !important;
                 padding: 16px 20px !important;
+                margin-bottom: 12px !important;
+                border-radius: {$borderRadius}px !important;
+                backdrop-filter: blur({$backgroundBlur}px) !important;
+                -webkit-backdrop-filter: blur({$backgroundBlur}px) !important;
+                box-shadow: 
+                    0 8px 32px rgba(0, 0, 0, 0.12),
+                    0 2px 8px rgba(0, 0, 0, 0.08),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+                pointer-events: auto !important;
+                cursor: default !important;
+                transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+                transform: translateX(100%) scale(0.95) !important;
+                opacity: 0 !important;
+                overflow: hidden !important;
                 {$themeStyles['notification']}
             }
             
             .rzlco-notifikasi-notification.rzlco-notifikasi-show {
-                opacity: 1 !important;
                 transform: translateX(0) scale(1) !important;
+                opacity: 1 !important;
             }
             
             .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
-                opacity: 0 !important;
                 transform: translateX(100%) scale(0.95) !important;
+                opacity: 0 !important;
                 margin-bottom: 0 !important;
                 max-height: 0 !important;
                 padding: 0 !important;
@@ -420,7 +421,24 @@ class Notifikasi implements NotifikasiInterface
             
             .rzlco-notifikasi-notification:hover {
                 transform: translateY(-2px) scale(1.02) !important;
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 
+                    0 12px 40px rgba(0, 0, 0, 0.15),
+                    0 4px 12px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            }
+            
+            .rzlco-notifikasi-icon {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 20px !important;
+                height: 20px !important;
+                border-radius: 50% !important;
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                flex-shrink: 0 !important;
+                margin-top: 2px !important;
+                color: white !important;
             }
             
             .rzlco-notifikasi-content {
@@ -428,20 +446,19 @@ class Notifikasi implements NotifikasiInterface
                 min-width: 0 !important;
             }
             
-            .rzlco-notifikasi-icon {
-                flex-shrink: 0 !important;
-                width: 20px !important;
-                height: 20px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                margin-top: 1px !important;
+            .rzlco-notifikasi-title {
+                margin: 0 0 4px 0 !important;
+                font-size: 14px !important;
+                font-weight: 600 !important;
+                line-height: 1.2 !important;
+                {$themeStyles['text']}
             }
             
             .rzlco-notifikasi-message {
-                font-weight: 500 !important;
-                word-break: break-word !important;
                 margin: 0 !important;
+                font-size: 13px !important;
+                opacity: 0.8 !important;
+                line-height: 1.3 !important;
                 {$themeStyles['text']}
             }
             
@@ -461,22 +478,22 @@ class Notifikasi implements NotifikasiInterface
                 position: absolute !important;
                 top: 12px !important;
                 right: 12px !important;
-                background: rgba(128, 128, 128, 0.2) !important;
+                background: none !important;
                 border: none !important;
+                color: inherit !important;
+                font-size: 12px !important;
                 cursor: pointer !important;
-                padding: 4px !important;
-                border-radius: 50% !important;
                 opacity: 0.7 !important;
                 transition: all 0.2s ease !important;
+                width: 20px !important;
+                height: 20px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 20px !important;
-                height: 20px !important;
+                border-radius: 50% !important;
+                background: rgba(128, 128, 128, 0.2) !important;
                 backdrop-filter: blur(10px) !important;
                 -webkit-backdrop-filter: blur(10px) !important;
-                font-size: 12px !important;
-                {$themeStyles['close']}
             }
             
             .rzlco-notifikasi-close:hover {
@@ -489,95 +506,73 @@ class Notifikasi implements NotifikasiInterface
                 transform: scale(0.95) !important;
             }
             
-            .rzlco-notifikasi-level-success {
-                background: rgba(34, 197, 94, 0.05) !important;
-                border-color: rgba(34, 197, 94, 0.2) !important;
+            .rzlco-notifikasi-success .rzlco-notifikasi-icon {
+                background: #22c55e !important;
             }
             
-            .rzlco-notifikasi-level-success .rzlco-notifikasi-icon {
-                color: #16a34a !important;
+            .rzlco-notifikasi-error .rzlco-notifikasi-icon {
+                background: #ef4444 !important;
             }
             
-            .rzlco-notifikasi-level-error {
-                background: rgba(239, 68, 68, 0.05) !important;
-                border-color: rgba(239, 68, 68, 0.2) !important;
+            .rzlco-notifikasi-warning .rzlco-notifikasi-icon {
+                background: #f59e0b !important;
             }
             
-            .rzlco-notifikasi-level-error .rzlco-notifikasi-icon {
-                color: #dc2626 !important;
+            .rzlco-notifikasi-info .rzlco-notifikasi-icon {
+                background: #3b82f6 !important;
             }
             
-            .rzlco-notifikasi-level-warning {
-                background: rgba(245, 158, 11, 0.05) !important;
-                border-color: rgba(245, 158, 11, 0.2) !important;
-            }
-            
-            .rzlco-notifikasi-level-warning .rzlco-notifikasi-icon {
-                color: #d97706 !important;
-            }
-            
-            .rzlco-notifikasi-level-info {
-                background: rgba(59, 130, 246, 0.05) !important;
-                border-color: rgba(59, 130, 246, 0.2) !important;
-            }
-            
-            .rzlco-notifikasi-level-info .rzlco-notifikasi-icon {
-                color: #2563eb !important;
-            }
-            
-            .rzlco-notifikasi-container-left .rzlco-notifikasi-notification {
+            .rzlco-notifikasi-position-top-left .rzlco-notifikasi-notification,
+            .rzlco-notifikasi-position-bottom-left .rzlco-notifikasi-notification {
                 transform: translateX(-100%) scale(0.95) !important;
             }
             
-            .rzlco-notifikasi-container-left .rzlco-notifikasi-notification.rzlco-notifikasi-show {
+            .rzlco-notifikasi-position-top-left .rzlco-notifikasi-notification.rzlco-notifikasi-show,
+            .rzlco-notifikasi-position-bottom-left .rzlco-notifikasi-notification.rzlco-notifikasi-show {
                 transform: translateX(0) scale(1) !important;
             }
             
-            .rzlco-notifikasi-container-left .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
+            .rzlco-notifikasi-position-top-left .rzlco-notifikasi-notification.rzlco-notifikasi-hide,
+            .rzlco-notifikasi-position-bottom-left .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
                 transform: translateX(-100%) scale(0.95) !important;
             }
             
-            .rzlco-notifikasi-container-center .rzlco-notifikasi-notification {
+            .rzlco-notifikasi-position-top-center .rzlco-notifikasi-notification,
+            .rzlco-notifikasi-position-bottom-center .rzlco-notifikasi-notification {
                 transform: translateY(-100%) scale(0.95) !important;
             }
             
-            .rzlco-notifikasi-container-center .rzlco-notifikasi-notification.rzlco-notifikasi-show {
+            .rzlco-notifikasi-position-top-center .rzlco-notifikasi-notification.rzlco-notifikasi-show,
+            .rzlco-notifikasi-position-bottom-center .rzlco-notifikasi-notification.rzlco-notifikasi-show {
                 transform: translateY(0) scale(1) !important;
             }
             
-            .rzlco-notifikasi-container-center .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
+            .rzlco-notifikasi-position-top-center .rzlco-notifikasi-notification.rzlco-notifikasi-hide,
+            .rzlco-notifikasi-position-bottom-center .rzlco-notifikasi-notification.rzlco-notifikasi-hide {
                 transform: translateY(-100%) scale(0.95) !important;
             }
             
+            @media (max-width: 640px) {
+                .rzlco-notifikasi-container {
+                    left: 10px !important;
+                    right: 10px !important;
+                    transform: none !important;
+                }
+                
+                .rzlco-notifikasi-notification {
+                    min-width: auto !important;
+                    max-width: none !important;
+                    margin-bottom: 8px !important;
+                }
+            }
+            
+            @media (prefers-reduced-motion: reduce) {
+                .rzlco-notifikasi-notification {
+                    transition: none !important;
+                }
+            }
+            
             {$themeStyles['media_query']}
-            
-            /* Force visibility for debugging */
-            .rzlco-notifikasi-container {
-                display: block !important;
-                visibility: visible !important;
-            }
-            
-            .rzlco-notifikasi-notification {
-                display: flex !important;
-                visibility: visible !important;
-            }
-            
-            /* Override any template CSS that might hide notifications */
-            .rzlco-notifikasi-container * {
-                box-sizing: border-box !important;
-            }
-            
-            /* Ensure notifications are always on top */
-            .rzlco-notifikasi-container {
-                position: fixed !important;
-                z-index: 999999999 !important;
-                pointer-events: none !important;
-            }
-            
-            .rzlco-notifikasi-notification {
-                pointer-events: auto !important;
-                z-index: 999999999 !important;
-            }
         </style>";
     }
 
@@ -628,6 +623,10 @@ class Notifikasi implements NotifikasiInterface
                             .rzlco-notifikasi-notification {
                                 background: rgba(30, 30, 30, {$backgroundOpacity}) !important;
                                 border-color: rgba(255, 255, 255, 0.1) !important;
+                            }
+                            
+                            .rzlco-notifikasi-title {
+                                color: rgba(255, 255, 255, 0.9) !important;
                             }
                             
                             .rzlco-notifikasi-message {
@@ -784,32 +783,34 @@ class Notifikasi implements NotifikasiInterface
                     }
                     
                     playSound(level) {
-                        // Create audio context for system sounds
-                        if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-                            const AudioContextClass = AudioContext || webkitAudioContext;
-                            const audioContext = new AudioContextClass();
+                        try {
+                            const AudioContext = window.AudioContext || window.webkitAudioContext;
+                            if (!AudioContext) return;
+
+                            const audioContext = new AudioContext();
                             const oscillator = audioContext.createOscillator();
                             const gainNode = audioContext.createGain();
-                            
+
                             oscillator.connect(gainNode);
                             gainNode.connect(audioContext.destination);
-                            
-                            // Different frequencies for different levels
+
                             const frequencies = {
                                 success: 800,
                                 error: 400,
                                 warning: 600,
                                 info: 700
                             };
-                            
+
                             oscillator.frequency.setValueAtTime(frequencies[level] || 700, audioContext.currentTime);
                             oscillator.type = 'sine';
-                            
+
                             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
                             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                            
+
                             oscillator.start(audioContext.currentTime);
                             oscillator.stop(audioContext.currentTime + 0.1);
+                        } catch (error) {
+                            console.warn('Could not play notification sound:', error);
                         }
                     }
                 }
@@ -832,21 +833,6 @@ class Notifikasi implements NotifikasiInterface
                         window.notifikasiManager = new NotifikasiManager();
                     }
                 }, 1000);
-                
-                // Global fallback for debugging
-                window.debugNotifikasi = function() {
-                    const container = document.getElementById(config.containerId);
-                    if (container) {
-                        console.log('Container found:', container);
-                        const notifications = container.querySelectorAll('.' + config.prefix + '-notification');
-                        console.log('Notifications found:', notifications.length);
-                        notifications.forEach((n, i) => {
-                            console.log('Notification ' + i + ':', n.id, n.className);
-                        });
-                    } else {
-                        console.log('Container not found');
-                    }
-                };
             })();
         ";
     }

@@ -7,11 +7,11 @@ namespace Rzlco\Notifikasi\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \Rzlco\Notifikasi\Notifikasi success(string $message, array $options = [])
- * @method static \Rzlco\Notifikasi\Notifikasi error(string $message, array $options = [])
- * @method static \Rzlco\Notifikasi\Notifikasi warning(string $message, array $options = [])
- * @method static \Rzlco\Notifikasi\Notifikasi info(string $message, array $options = [])
- * @method static \Rzlco\Notifikasi\Notifikasi add(\Rzlco\Notifikasi\Enums\NotificationLevel $level, string $message, array $options = [])
+ * @method static \Rzlco\Notifikasi\Notifikasi success(string $title, string $message = '', array $options = [])
+ * @method static \Rzlco\Notifikasi\Notifikasi error(string $title, string $message = '', array $options = [])
+ * @method static \Rzlco\Notifikasi\Notifikasi warning(string $title, string $message = '', array $options = [])
+ * @method static \Rzlco\Notifikasi\Notifikasi info(string $title, string $message = '', array $options = [])
+ * @method static \Rzlco\Notifikasi\Notifikasi add(\Rzlco\Notifikasi\Enums\NotificationLevel $level, string $title, string $message = '', array $options = [])
  * @method static array getNotifications()
  * @method static \Rzlco\Notifikasi\Notifikasi clear()
  * @method static bool hasNotifications()
