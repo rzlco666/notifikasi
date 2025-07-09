@@ -76,13 +76,13 @@ return [
         'animation_duration' => (int) env('NOTIFIKASI_ANIMATION_DURATION', 300),
         
         // Background blur strength in pixels
-        'blur_strength' => (int) env('NOTIFIKASI_BLUR_STRENGTH', 25),
+        'blur_strength' => (int) env('NOTIFIKASI_BLUR_STRENGTH', 10),
         
         // Border radius in pixels
         'border_radius' => (int) env('NOTIFIKASI_BORDER_RADIUS', 16),
         
         // Background opacity (0.0 - 1.0)
-        'backdrop_opacity' => (float) env('NOTIFIKASI_BACKDROP_OPACITY', 0.85),
+        'backdrop_opacity' => (float) env('NOTIFIKASI_BACKDROP_OPACITY', 0.50),
         
         // Show time display
         'show_time' => (bool) env('NOTIFIKASI_SHOW_TIME', true),

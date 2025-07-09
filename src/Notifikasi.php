@@ -250,13 +250,18 @@ class Notifikasi implements NotifikasiInterface
         $title = htmlspecialchars($notification->getTitle(), ENT_QUOTES, 'UTF-8');
         $message = htmlspecialchars($notification->getMessage(), ENT_QUOTES, 'UTF-8');
         $icon = $this->getIcon($notification->getLevel());
-        $closeButton = $this->config['show_close_button'] ? $this->renderCloseButton() : '';
+        
+        // Use notification's own options (which include merged config + overrides)
+        $showCloseButton = $notification->getOption('show_close_button', $this->config['show_close_button']);
+        $closeButton = $showCloseButton ? $this->renderCloseButton() : '';
         $prefix = $this->config['css_prefix'];
 
-        // Add time display if enabled
+        // Add time display if enabled in notification's options
         $timeDisplay = '';
-        if ($this->config['show_time']) {
-            $time = $this->getCurrentTime();
+        $showTime = $notification->getOption('show_time', $this->config['show_time']);
+        if ($showTime) {
+            $timeFormat = $notification->getOption('time_format', $this->config['time_format']);
+            $time = $this->getCurrentTime($timeFormat);
             $timeDisplay = sprintf(
                 '<div class="%s-time">%s</div>',
                 $prefix,
@@ -311,13 +316,13 @@ class Notifikasi implements NotifikasiInterface
         };
     }
 
-    private function getCurrentTime(): string
+    private function getCurrentTime(string $format = '12'): string
     {
         $now = new \DateTime();
         $hours = (int) $now->format('H');
         $minutes = (int) $now->format('i');
 
-        if ($this->config['time_format'] === '24') {
+        if ($format === '24') {
             return sprintf('%02d:%02d', $hours, $minutes);
         } else {
             $period = $hours >= 12 ? 'PM' : 'AM';

@@ -12,6 +12,7 @@ class NotificationTest extends TestCase
     {
         $notification = new Notification(
             NotificationLevel::SUCCESS,
+            'Test Title',
             'Test Message'
         );
 
@@ -22,17 +23,19 @@ class NotificationTest extends TestCase
     {
         $notification = new Notification(
             NotificationLevel::SUCCESS,
+            'Test Title',
             'Test Message'
         );
 
         $this->assertEquals('Test Message', $notification->getMessage());
+        $this->assertEquals('Test Title', $notification->getTitle());
         $this->assertEquals(NotificationLevel::SUCCESS, $notification->getLevel());
     }
 
     public function testNotificationHasUniqueId(): void
     {
-        $notification1 = new Notification(NotificationLevel::SUCCESS, 'Message 1');
-        $notification2 = new Notification(NotificationLevel::ERROR, 'Message 2');
+        $notification1 = new Notification(NotificationLevel::SUCCESS, 'Title 1', 'Message 1');
+        $notification2 = new Notification(NotificationLevel::ERROR, 'Title 2', 'Message 2');
 
         $this->assertNotEquals($notification1->getId(), $notification2->getId());
         $this->assertIsString($notification1->getId());
@@ -42,7 +45,7 @@ class NotificationTest extends TestCase
     public function testNotificationHasTimestamp(): void
     {
         $before = time();
-        $notification = new Notification(NotificationLevel::INFO, 'Message');
+        $notification = new Notification(NotificationLevel::INFO, 'Title', 'Message');
         $after = time();
 
         $timestamp = $notification->getTimestamp();
@@ -60,6 +63,7 @@ class NotificationTest extends TestCase
 
         $notification = new Notification(
             NotificationLevel::WARNING,
+            'Test Title',
             'Test Message',
             $options
         );
@@ -71,14 +75,14 @@ class NotificationTest extends TestCase
 
     public function testNotificationDefaultOptions(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message');
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Message');
 
         $this->assertEquals([], $notification->getOptions());
     }
 
     public function testCanSetAndGetOptions(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message');
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Message');
         
         $notification->setOption('duration', 7000);
         $this->assertEquals(7000, $notification->getOption('duration'));
@@ -86,7 +90,7 @@ class NotificationTest extends TestCase
 
     public function testCanCheckIfOptionExists(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message', ['test' => 'value']);
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Message', ['test' => 'value']);
         
         $this->assertTrue($notification->hasOption('test'));
         $this->assertFalse($notification->hasOption('nonexistent'));
@@ -102,6 +106,7 @@ class NotificationTest extends TestCase
 
         $notification = new Notification(
             NotificationLevel::ERROR,
+            'Test Title',
             'Test Message',
             $options
         );
@@ -111,10 +116,12 @@ class NotificationTest extends TestCase
         $this->assertIsArray($array);
         $this->assertArrayHasKey('id', $array);
         $this->assertArrayHasKey('level', $array);
+        $this->assertArrayHasKey('title', $array);
         $this->assertArrayHasKey('message', $array);
         $this->assertArrayHasKey('options', $array);
         $this->assertArrayHasKey('timestamp', $array);
 
+        $this->assertEquals('Test Title', $array['title']);
         $this->assertEquals('Test Message', $array['message']);
         $this->assertEquals('error', $array['level']);
         $this->assertEquals($options, $array['options']);
@@ -125,6 +132,7 @@ class NotificationTest extends TestCase
         $data = [
             'id' => 'test-id',
             'level' => 'success',
+            'title' => 'Test Title',
             'message' => 'Test Message',
             'options' => ['duration' => 3000],
             'timestamp' => 1234567890
@@ -134,6 +142,7 @@ class NotificationTest extends TestCase
         
         $this->assertEquals('test-id', $notification->getId());
         $this->assertEquals(NotificationLevel::SUCCESS, $notification->getLevel());
+        $this->assertEquals('Test Title', $notification->getTitle());
         $this->assertEquals('Test Message', $notification->getMessage());
         $this->assertEquals(['duration' => 3000], $notification->getOptions());
         $this->assertEquals(1234567890, $notification->getTimestamp());
@@ -149,14 +158,14 @@ class NotificationTest extends TestCase
         ];
 
         foreach ($levels as $level) {
-            $notification = new Notification($level, 'Message');
+            $notification = new Notification($level, 'Title', 'Message');
             $this->assertEquals($level, $notification->getLevel());
         }
     }
 
     public function testEmptyMessage(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, '');
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', '');
         
         $this->assertEquals('', $notification->getMessage());
     }
@@ -165,7 +174,7 @@ class NotificationTest extends TestCase
     {
         $longMessage = str_repeat('B', 5000);
 
-        $notification = new Notification(NotificationLevel::SUCCESS, $longMessage);
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', $longMessage);
         
         $this->assertEquals($longMessage, $notification->getMessage());
     }
@@ -174,7 +183,7 @@ class NotificationTest extends TestCase
     {
         $specialMessage = 'Test with "quotes" and \'apostrophes\' & ampersands';
 
-        $notification = new Notification(NotificationLevel::SUCCESS, $specialMessage);
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', $specialMessage);
         
         $this->assertEquals($specialMessage, $notification->getMessage());
     }
@@ -183,7 +192,7 @@ class NotificationTest extends TestCase
     {
         $unicodeMessage = 'رسالة تجريبية مع الرموز التعبيرية 😀';
 
-        $notification = new Notification(NotificationLevel::SUCCESS, $unicodeMessage);
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', $unicodeMessage);
         
         $this->assertEquals($unicodeMessage, $notification->getMessage());
     }
@@ -200,27 +209,38 @@ class NotificationTest extends TestCase
             'number' => 42.5
         ];
 
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message', $complexData);
-        
+        $notification = new Notification(
+            NotificationLevel::INFO,
+            'Complex Title',
+            'Complex Message',
+            $complexData
+        );
+
         $this->assertEquals($complexData, $notification->getOptions());
     }
 
     public function testToArrayWithComplexData(): void
     {
         $complexData = [
-            'user' => ['id' => 1, 'name' => 'John'],
-            'metadata' => ['created_at' => '2023-01-01']
+            'array' => [1, 2, 3],
+            'object' => ['nested' => 'value'],
+            'boolean' => false
         ];
 
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message', $complexData);
-        
+        $notification = new Notification(
+            NotificationLevel::WARNING,
+            'Complex Title',
+            'Complex Message',
+            $complexData
+        );
+
         $array = $notification->toArray();
         $this->assertEquals($complexData, $array['options']);
     }
 
     public function testIdIsConsistentAcrossMethodCalls(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message');
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Message');
         
         $id1 = $notification->getId();
         $id2 = $notification->getId();
@@ -230,9 +250,10 @@ class NotificationTest extends TestCase
 
     public function testTimestampIsConsistentAcrossMethodCalls(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message');
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Message');
         
         $timestamp1 = $notification->getTimestamp();
+        sleep(1);
         $timestamp2 = $notification->getTimestamp();
         
         $this->assertEquals($timestamp1, $timestamp2);
@@ -240,7 +261,7 @@ class NotificationTest extends TestCase
 
     public function testNotificationLevelToString(): void
     {
-        $notification = new Notification(NotificationLevel::SUCCESS, 'Message');
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Message');
         $array = $notification->toArray();
         
         $this->assertEquals('success', $array['level']);
@@ -248,24 +269,33 @@ class NotificationTest extends TestCase
 
     public function testAllLevelsToString(): void
     {
-        $levels = [
-            NotificationLevel::SUCCESS,
-            NotificationLevel::ERROR,
-            NotificationLevel::WARNING,
-            NotificationLevel::INFO
-        ];
-        
-        $expected = [
-            'success',
-            'error', 
-            'warning',
-            'info'
+        $levelsToTest = [
+            [NotificationLevel::SUCCESS, 'success'],
+            [NotificationLevel::ERROR, 'error'],
+            [NotificationLevel::WARNING, 'warning'],
+            [NotificationLevel::INFO, 'info']
         ];
 
-        foreach ($levels as $index => $level) {
-            $notification = new Notification($level, 'Message');
+        foreach ($levelsToTest as [$level, $expectedString]) {
+            $notification = new Notification($level, 'Title', 'Message');
             $array = $notification->toArray();
-            $this->assertEquals($expected[$index], $array['level']);
+            $this->assertEquals($expectedString, $array['level']);
         }
+    }
+
+    public function testCanSetTitle(): void
+    {
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Original Title', 'Message');
+        
+        $notification->setTitle('New Title');
+        $this->assertEquals('New Title', $notification->getTitle());
+    }
+
+    public function testCanSetMessage(): void
+    {
+        $notification = new Notification(NotificationLevel::SUCCESS, 'Title', 'Original Message');
+        
+        $notification->setMessage('New Message');
+        $this->assertEquals('New Message', $notification->getMessage());
     }
 } 
